@@ -31,8 +31,12 @@ class CarClassifierResNet(nn.Module):
         return x
 
 
-def predict(image_path):
-    image = Image.open(image_path).convert("RGB")
+def predict(image_input):
+    """
+    image_input: either a file path (str) or a Streamlit uploaded file
+    """
+    image = Image.open(image_input).convert("RGB")  # works for both
+
     transform = transforms.Compose([
         transforms.Resize((224,224)),
         transforms.ToTensor(),
@@ -41,10 +45,9 @@ def predict(image_path):
     image_tensor = transform(image).unsqueeze(0)
 
     global trained_model
-
     if trained_model is None:
         trained_model = CarClassifierResNet()
-        trained_model.load_state_dict(torch.load("model\saved_model.pth"))
+        trained_model.load_state_dict(torch.load(r"model\saved_model.pth", map_location=torch.device('cpu')))
         trained_model.eval()
 
     with torch.no_grad():
